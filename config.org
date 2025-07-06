@@ -1,0 +1,146 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Your Name
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+
+* Package Management
+** Use-package
+#+begin_src emacs-lisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
+
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
+#+end_src
+
+* Basic Settings
+#+begin_src emacs-lisp
+;;(load-theme 'modus-vivendi t)
+(global-display-line-numbers-mode 1)
+
+;;(global-auto-revert-mode 1)
+;;(setq auto-save-default t)
+;;(setq auto-save-interval 300)
+#+end_src
+
+* Themes
+** Doom Themes
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :config
+  (load-theme 'doom-one t))
+#+end_src
+
+* Navigation and Completion
+** Ivy
+#+begin_src emacs-lisp
+(use-package ivy
+  :ensure t)
+#+end_src
+
+** Counsel
+#+begin_src emacs-lisp
+(use-package counsel
+  :ensure t
+  :config
+  (global-set-key (kbd "M-x") 'counsel-M-x))
+#+end_src
+
+** Projectile
+#+begin_src emacs-lisp
+(use-package projectile
+  :ensure t)
+#+end_src
+
+** Company
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t
+  :init
+  (global-company-mode))
+#+end_src
+
+* Evil Mode Configuration
+** Evil
+#+begin_src emacs-lisp
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map "jk" 'evil-normal-state))
+#+end_src
+
+** Evil Collection
+#+begin_src emacs-lisp
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (evil-collection-init))
+#+end_src
+
+** Evil Surround
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+#+end_src
+
+* General Keybindings
+#+begin_src emacs-lisp
+(use-package general
+  :ensure t)
+
+(use-package general
+  :config
+  (general-create-definer leader-def
+    :prefix "SPC"
+    :non-normal-prefix "M-SPC"
+    :states '(normal insert emacs))
+
+  (leader-def ":" 'counsel-M-x)
+  (leader-def "b N" 'switch-to-buffer)
+(setq which-key-idle-delay 0.5)
+(setq which-key-show-remaining-keys t)
+#+end_src
+
+* Custom Variables and Faces
+#+begin_src emacs-lisp
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(evil-surround which-key general evil-collection evil doom-themes ivy)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+#+end_src
+
+* Clojure Configuration
+#+begin_src emacs-lisp
+(use-package cider
+  :ensure t
+  :config
+  ;; Example: Automatically switch to the current file's namespace when starting REPL
+  (setq cider-repl-auto-to-ns t))
+
+(let ((path-to-lein "/opt/homebrew/bin/")) ; Enter the actual lein executable path here.
+  (unless (member path-to-lein exec-path)
+    (setq exec-path (append exec-path (list path-to-lein)))))
+#+end_src
