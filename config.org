@@ -134,13 +134,13 @@
 
 * Clojure Configuration
 #+begin_src emacs-lisp
-(use-package cider
-  :ensure t
-  :config
-  ;; Example: Automatically switch to the current file's namespace when starting REPL
-  (setq cider-repl-auto-to-ns t))
+;; (use-package cider
+;;   :ensure t
+;;   :config
+;;   ;; Example: Automatically switch to the current file's namespace when starting REPL
+;;   (setq cider-repl-auto-to-ns t))
 
-(let ((path-to-lein "/opt/homebrew/bin/")) ; Enter the actual lein executable path here.
-  (unless (member path-to-lein exec-path)
-    (setq exec-path (append exec-path (list path-to-lein)))))
+;; (let ((path-to-lein "/opt/homebrew/bin/")) ; Enter the actual lein executable path here.
+;;   (unless (member path-to-lein exec-path)
+;;     (setq exec-path (append exec-path (list path-to-lein)))))
 #+end_src
