@@ -24,6 +24,22 @@ Before using `use-package`, you need to set up Emacs package archives. Here, MEL
 (setq use-package-always-ensure t)
 #+end_src
 
+* Environment Setup
+** exec-path-from-shell
+*** Role
+Ensures that Emacs shares the same environment variables as your shell, particularly the `PATH`. This is crucial for finding and executing command-line tools like `brew` from within Emacs on macOS.
+
+*** Configuration Method
+This package copies the `PATH` from your shell environment into Emacs upon startup.
+
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+#+end_src
+
 * Basic Settings
 *** Role
 Configures basic Emacs behavior. Primarily includes settings for visual elements and file saving methods to improve usability.
@@ -161,7 +177,40 @@ Install `Evil Surround` using `use-package`, and activate it after the `Evil` pa
   (global-evil-surround-mode 1))
 #+end_src
 
+* vterm
+** Role
+`vterm` is a package that provides a fully-featured terminal emulator inside Emacs. It allows you to run shell commands, use command-line tools, and manage terminal sessions without leaving Emacs.
+
+** Configuration Method
+Install `vterm` using `use-package`. Before attempting to install `vterm`, the configuration checks if `cmake` is available on the system. If `cmake` is not found on macOS, it will be installed automatically using Homebrew. A restart of Emacs is required after the installation for the changes to take effect and for `vterm` to compile correctly.
+
+#+begin_src emacs-lisp
+(when (and (eq system-type 'darwin) (not (executable-find "cmake")))
+  (message "vterm: cmake not found. Attempting to install via Homebrew...")
+  (shell-command "brew install cmake")
+  (message "CMake has been installed. Please restart Emacs to allow vterm to compile."))
+
+(use-package vterm
+  :ensure t
+  :init
+  (setq vterm-always-compile-module t))
+#+end_src
+
 * General Keybindings
+** which-key
+*** Role
+`which-key` is an essential package that displays available keybindings in a popup window after you press a prefix key (like your leader key `SPC`). This makes discovering and using keybindings much easier.
+
+*** Configuration Method
+Install and activate `which-key` using `use-package`. `(which-key-mode)` is called in the `:config` block to enable it globally.
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+#+end_src
+
 ** General
 *** Role
 `General` is a powerful package used for setting custom keybindings in Emacs. It helps easily define and manage complex key sequences, especially for building a Vim-like keybinding system using a 'leader key'.
@@ -189,10 +238,17 @@ Define actual keybindings using `leader-def`.
   (general-create-definer leader-def
     :prefix "SPC"
     :non-normal-prefix "M-SPC"
-    :states '(normal insert emacs)))
+    :states '(normal insert emacs))
 
-  (leader-def ":" 'counsel-M-x)
-  (leader-def "b N" 'switch-to-buffer)
+  (leader-def
+    ":" 'counsel-M-x
+    "b" '(:ignore t :which-key "Buffers")
+    "b N" 'switch-to-buffer
+    "b k" 'kill-buffer
+    "t" '(:ignore t :which-key "Terminal")
+    "t t" 'vterm
+    "f" '(:ignore t :which-key "Files")
+    "f p" '("Find config.org" . (lambda () (interactive) (find-file (expand-file-name "~/dotfiles/config.org"))))))
 (setq which-key-idle-delay 0.5)
 (setq which-key-show-remaining-keys t)
 #+end_src
