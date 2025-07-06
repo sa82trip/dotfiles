@@ -4,6 +4,12 @@
 
 * Package Management
 ** Use-package
+*** Role
+`use-package` is used for declaratively managing Emacs packages. It helps define package installation, loading, and configuration concisely. It automatically installs necessary packages and contributes to optimizing Emacs startup time.
+
+*** Configuration Method
+Before using `use-package`, you need to set up Emacs package archives. Here, MELPA, GNU ELPA, and MELPA Stable archives are added. `package-initialize` initializes the package system, and `use-package` is automatically installed if not present. `use-package-always-ensure t` ensures that all packages specified in `use-package` blocks are automatically installed.
+
 #+begin_src emacs-lisp
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -19,6 +25,13 @@
 #+end_src
 
 * Basic Settings
+*** Role
+Configures basic Emacs behavior. Primarily includes settings for visual elements and file saving methods to improve usability.
+
+*** Configuration Method
+- `global-display-line-numbers-mode 1`: Displays line numbers in all buffers. Useful for writing code or debugging.
+- Commented-out sections are related to auto-saving and theme loading. You can uncomment them as needed.
+
 #+begin_src emacs-lisp
 ;;(load-theme 'modus-vivendi t)
 (global-display-line-numbers-mode 1)
@@ -30,6 +43,12 @@
 
 * Themes
 ** Doom Themes
+*** Role
+`doom-themes` provides a variety of beautiful themes for Emacs. It enhances visual comfort and code readability.
+
+*** Configuration Method
+Install and load `doom-themes` using `use-package`. `:ensure t` ensures the package is automatically installed if not present. In the `:config` block, use the `load-theme` function to load your desired theme. Here, the `doom-one` theme is used.
+
 #+begin_src emacs-lisp
 (use-package doom-themes
   :ensure t
@@ -39,12 +58,24 @@
 
 * Navigation and Completion
 ** Ivy
+*** Role
+`Ivy` is a flexible and fast completion framework for Emacs's minibuffer. It helps efficiently search and select various items such as files, buffers, and commands.
+
+*** Configuration Method
+Install and activate `Ivy` using `use-package`. `:ensure t` ensures the package is automatically installed if not present.
+
 #+begin_src emacs-lisp
 (use-package ivy
   :ensure t)
 #+end_src
 
 ** Counsel
+*** Role
+`Counsel` provides an interface for various commands and functions based on the `Ivy` framework. It enhances usability by integrating core Emacs functions like `M-x` (execute-extended-command) with `Ivy`'s powerful search and filtering capabilities.
+
+*** Configuration Method
+Install `Counsel` using `use-package`, and in the `:config` block, bind the `M-x` key to `counsel-M-x` to enable Ivy-based command execution.
+
 #+begin_src emacs-lisp
 (use-package counsel
   :ensure t
@@ -53,12 +84,24 @@
 #+end_src
 
 ** Projectile
+*** Role
+`Projectile` is a powerful tool for project management in Emacs. It helps efficiently perform project-related tasks such as searching files within a project, switching buffers, compiling, and running tests.
+
+*** Configuration Method
+Install and activate `Projectile` using `use-package`. It works well in most projects without additional configuration.
+
 #+begin_src emacs-lisp
 (use-package projectile
   :ensure t)
 #+end_src
 
 ** Company
+*** Role
+`Company` is Emacs's text auto-completion framework. It provides context-aware completion candidates when writing code, increasing productivity.
+
+*** Configuration Method
+Install `Company` using `use-package`, and in the `:init` block, activate `global-company-mode` to enable auto-completion in all buffers.
+
 #+begin_src emacs-lisp
 (use-package company
   :ensure t
@@ -68,6 +111,15 @@
 
 * Evil Mode Configuration
 ** Evil
+*** Role
+`Evil` is a powerful emulation layer that allows you to use Vim's keybindings and editing style in Emacs. It enables Vim users to leverage Emacs's rich features with familiar Vim operations.
+
+*** Configuration Method
+Install and activate `Evil` using `use-package`.
+- In the `:init` block, `evil-want-integration t` enables integration with other Emacs packages, and `evil-want-keybinding nil` prevents `Evil` from overwriting default Emacs keybindings.
+- In the `:config` block, `(evil-mode 1)` globally activates `Evil` mode.
+- `(define-key evil-insert-state-map "jk" 'evil-normal-state)` is a custom keybinding to switch to normal mode from insert mode by pressing `jk`.
+
 #+begin_src emacs-lisp
 (use-package evil
   :ensure t
@@ -80,6 +132,12 @@
 #+end_src
 
 ** Evil Collection
+*** Role
+`Evil Collection` integrates `Evil` mode with various built-in Emacs features and popular packages, providing a consistent Vim keybinding experience. For example, it allows using Vim keybindings in Dired, Magit, Org-mode, and more.
+
+*** Configuration Method
+Install `Evil Collection` using `use-package`, and activate it after the `Evil` package loads using `:after evil`. In the `:config` block, call `(evil-collection-init)` to initialize the integration.
+
 #+begin_src emacs-lisp
 (use-package evil-collection
   :ensure t
@@ -89,6 +147,12 @@
 #+end_src
 
 ** Evil Surround
+*** Role
+`Evil Surround` is a package similar to Vim's `surround.vim` plugin, allowing easy addition, modification, and deletion of parentheses, quotes, tags, and more. It is very useful when editing code.
+
+*** Configuration Method
+Install `Evil Surround` using `use-package`, and activate it after the `Evil` package loads using `:after evil`. In the `:config` block, call `(global-evil-surround-mode 1)` to globally activate `Evil Surround` functionality.
+
 #+begin_src emacs-lisp
 (use-package evil-surround
   :ensure t
@@ -98,6 +162,24 @@
 #+end_src
 
 * General Keybindings
+** General
+*** Role
+`General` is a powerful package used for setting custom keybindings in Emacs. It helps easily define and manage complex key sequences, especially for building a Vim-like keybinding system using a 'leader key'.
+
+*** Configuration Method
+Install `General` using `use-package`.
+
+In the `:config` block, use `general-create-definer` to create a new keybinding definer called `leader-def`.
+- `:prefix "SPC"`: Sets the spacebar as the leader key. This means all custom keybindings will start after pressing the spacebar.
+- `:non-normal-prefix "M-SPC"`: Sets `M-SPC` (Alt + Space) as the leader key for non-normal states (e.g., insert mode).
+- `:states '(normal insert emacs)`: Enables this keybinding definer for `normal`, `insert`, and `emacs` modes.
+
+Define actual keybindings using `leader-def`.
+- `(leader-def ":" 'counsel-M-x)`: Pressing `SPC :` executes `counsel-M-x` (Ivy-based command execution).
+- `(leader-def "b N" 'switch-to-buffer)`: Pressing `SPC b N` executes the buffer switching command.
+
+`which-key-idle-delay` and `which-key-show-remaining-keys` configure the behavior of the `which-key` package (often used with `General`). `which-key` is a useful package that shows a popup of available next keybindings after pressing a leader key.
+
 #+begin_src emacs-lisp
 (use-package general
   :ensure t)
