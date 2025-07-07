@@ -195,6 +195,22 @@ Emacs がシェルと同じ環境変数、特に `PATH` を共有するように
   (global-evil-surround-mode 1))
 #+end_src
 
+* 編集
+** smartparens
+*** 役割
+`smartparens`は、ペア単位の編集を支援するパッケージです。括弧、ブラケット、引用符などのペアを自動的に挿入し、それらをインテリジェントに操作するコマンドを提供します。コードや構造化されたテキストを記述する際に非常に便利です。
+
+*** 設定方法
+`use-package` を使用して `smartparens` をインストールします。`:config` ブロックで `(smartparens-global-mode 1)` を呼び出し、グローバルで機能を有効にします。
+
+#+begin_src emacs-lisp
+(use-package smartparens
+  :ensure t
+  :config
+  (require 'smartparens-config)
+  (smartparens-global-mode 1))
+#+end_src
+
 * vterm
 ** 役割
 `vterm` は、Emacs 内でフル機能のターミナルエミュレータを提供するパッケージです。Emacs を離れることなく、シェルコマンドの実行、コマンドラインツールの使用、ターミナルセッションの管理ができます。

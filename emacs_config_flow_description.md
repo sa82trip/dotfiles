@@ -9,7 +9,10 @@
 5.  **config.org 엮기 (Tangle)**: `config.org` 파일 내에 정의된 모든 `emacs-lisp` 소스 코드 블록이 추출되어 하나의 Emacs Lisp 파일로 변환됩니다. 이 과정에서 Org-mode의 주석이나 문서화 내용은 무시되고 순수한 코드만 추출됩니다.
 6.  **생성된 Emacs Lisp 코드**: 엮기 과정을 통해 생성된 Emacs Lisp 코드가 메모리에 로드되거나, 일반적으로 `init.el`과 동일한 디렉토리에 `config.el`과 같은 이름으로 저장됩니다. (현재 설정에서는 `init.el`이 `config.org`를 직접 로드하고 엮으므로 별도의 `config.el` 파일이 생성되지 않고 메모리에서 처리됩니다.)
 7.  **설정 실행**: 추출된 Emacs Lisp 코드가 Emacs 환경 내에서 순차적으로 실행됩니다. 이 과정에서 정의된 모든 설정과 패키지가 로드되고 활성화됩니다.
-8.  **패키지 관리 (use-package)**: `use-package` 매크로를 사용하여 정의된 모든 패키지가 설치 여부를 확인하고, 필요하면 다운로드 및 설치됩니다. 이후 각 패키지의 `:init`, `:config` 블록에 정의된 설정이 적용됩니다.
+8.  **패키지 관리 및 로드 (use-package)**:
+    -   **패키지 다운로드**: Emacs는 `package-archives`에 설정된 저장소(예: MELPA, GNU ELPA)에서 패키지를 다운로드합니다. 다운로드된 패키지는 일반적으로 Emacs의 사용자 설정 디렉토리 내의 `elpa` 서브디렉토리(예: `~/.emacs.d/elpa/`)에 저장됩니다.
+    -   **`package-initialize`**: Emacs 시작 시 `package-initialize` 함수가 호출되어 `elpa` 디렉토리에 있는 설치된 패키지들을 로드 경로에 추가하고 초기화합니다.
+    -   **`use-package`의 역할**: `use-package` 매크로는 특정 패키지가 설치되어 있는지 확인하고, 설치되어 있지 않다면 자동으로 다운로드 및 설치를 지시합니다(`:ensure t` 옵션). 패키지가 로드된 후에는 `use-package` 블록 내의 `:init` (패키지 로드 전 실행) 및 `:config` (패키지 로드 후 실행) 섹션에 정의된 Emacs Lisp 코드를 실행하여 해당 패키지를 활성화하고 사용자 정의 설정을 적용합니다.
 9.  **기본 설정**: `global-display-line-numbers-mode`와 같은 기본적인 Emacs 설정이 적용됩니다.
 10. **테마 (doom-themes)**: `doom-themes` 패키지가 로드되고 `doom-one` 테마가 활성화됩니다.
 11. **탐색 및 자동 완성 (ivy, counsel, projectile, company)**: `ivy`, `counsel`, `projectile`, `company`와 같은 탐색 및 자동 완성 관련 패키지들이 로드되고 설정됩니다.

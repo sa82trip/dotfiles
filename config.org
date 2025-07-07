@@ -195,6 +195,22 @@ Install `Evil Surround` using `use-package`, and activate it after the `Evil` pa
   (global-evil-surround-mode 1))
 #+end_src
 
+* Editing
+** smartparens
+*** Role
+`smartparens` is a package that helps with pair-aware editing. It automatically inserts closing pairs for parentheses, brackets, quotes, etc., and provides commands to manipulate them intelligently. This is very useful for writing code and structured text.
+
+*** Configuration Method
+Install `smartparens` using `use-package`. In the `:config` block, `(smartparens-global-mode 1)` enables the functionality globally.
+
+#+begin_src emacs-lisp
+(use-package smartparens
+  :ensure t
+  :config
+  (require 'smartparens-config)
+  (smartparens-global-mode 1))
+#+end_src
+
 * vterm
 ** Role
 `vterm` is a package that provides a fully-featured terminal emulator inside Emacs. It allows you to run shell commands, use command-line tools, and manage terminal sessions without leaving Emacs.
