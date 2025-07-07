@@ -19,18 +19,20 @@ Before using `use-package`, you need to set up Emacs package archives. Here, MEL
 (package-initialize)
 
 (defvar my-package-install-retry-count 0)
-(defadvice package-install (around my-package-install-advice activate)
-  "Retry package installation after refreshing contents if it fails."
+(defadvice package-install (around my-package-install-advice (package-name) activate)
+  "Retry package installation after refreshing contents if it fails, with user confirmation."
   (condition-case err
       ad-do-it
     (error
-     (when (and (string-match "Failed to install" (cdr (car err)))
-                (< my-package-install-retry-count 3)) ; Limit retries to prevent infinite loops
+     (when (and (string-match "unavailable" (cadr err))
+                (< my-package-install-retry-count 3))
        (setq my-package-install-retry-count (1+ my-package-install-retry-count))
-       (message "Package installation failed. Refreshing package contents and retrying...")
-       (package-refresh-contents)
-       (package-install (car (cdr (car err)))) ; Retry installation with the same package
-       ))))
+       (if (y-or-n-p (format "Package installation failed for %s. Refresh package contents and retry? " package-name))
+           (progn
+             (message "Refreshing package contents and retrying...")
+             (package-refresh-contents)
+             (package-install package-name)) ; Retry installation with the same package
+         (message "Package installation aborted by user."))))))
 
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
