@@ -1,0 +1,322 @@
+#+TITLE: Emacs Configuration
+#+AUTHOR: Ordinary Devv 
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+
+* パッケージ管理
+** Use-package
+*** 役割
+`use-package`は、Emacsパッケージを宣言的に管理するために使用されます。パッケージのインストール、ロード、設定を簡潔に定義するのに役立ちます。必要なパッケージを自動的にインストールし、Emacsの起動時間の最適化に貢献します。
+
+*** 設定方法
+`use-package`を使用する前に、Emacsパッケージアーカイブを設定する必要があります。ここでは、MELPA、GNU ELPA、MELPA Stableアーカイブが追加されます。`package-initialize`はパッケージシステムを初期化し、`use-package`が存在しない場合は自動的にインストールされます。`use-package-always-ensure t`は、`use-package`ブロックで指定されたすべてのパッケージが自動的にインストールされるようにします。
+
+#+begin_src emacs-lisp
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives '("gnu"   . "https://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/"))
+
+(package-initialize)
+
+(defvar my-package-install-retry-count 0)
+(defadvice package-install (around my-package-install-advice (package-name) activate)
+  "Retry package installation after refreshing contents if it fails, with user confirmation."
+  (condition-case err
+      ad-do-it
+    (error
+     (when (and (string-match "unavailable" (cadr err))
+                (< my-package-install-retry-count 3))
+       (setq my-package-install-retry-count (1+ my-package-install-retry-count))
+       (if (y-or-n-p (format "パッケージのインストールに失敗しました(%s)。パッケージの内容を更新して再試行しますか？ " package-name))
+           (progn
+             (message "パッケージの内容を更新して再試行します...")
+             (package-refresh-contents)
+             (package-install package-name)) ; Retry installation with the same package
+         (message "ユーザーによってパッケージのインストールが中止されました。"))))))
+
+(unless (package-installed-p 'use-package)
+  (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
+#+end_src
+
+* 環境設定
+** exec-path-from-shell
+*** 役割
+Emacsがシェルと同じ環境変数、特に`PATH`を共有するようにします。これは、macOSでEmacs内から`brew`のようなコマンドラインツールを見つけて実行するために重要です。
+
+*** 設定方法
+このパッケージは、起動時にシェルの環境から`PATH`をEmacsにコピーします。
+
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+#+end_src
+
+* 基本設定
+*** 役割
+基本的なEmacsの動作を設定します。主に、使いやすさを向上させるための視覚要素とファイル保存方法に関する設定が含まれます。
+
+*** 設定方法
+- `global-display-line-numbers-mode 1`: すべてのバッファに行番号を表示します。コードの記述やデバッグに役立ちます。
+- コメントアウトされたセクションは、自動保存とテーマのロードに関連しています。必要に応じてコメントを解除できます。
+
+#+begin_src emacs-lisp
+;;(load-theme 'modus-vivendi t)
+(global-display-line-numbers-mode 1)
+
+;;(global-auto-revert-mode 1)
+;;(setq auto-save-default t)
+;;(setq auto-save-interval 300)
+
+(setq scroll-conservatively 100000) ; カーソルが画面中央に自動スクロールされるのを防ぐ
+#+end_src
+
+* テーマ
+** Doom Themes
+*** 役割
+`doom-themes`は、Emacs用の様々な美しいテーマを提供します。視覚的な快適さとコードの可読性を向上させます。
+
+*** 設定方法
+`use-package`を使用して`doom-themes`をインストールしてロードします。`:ensure t`は、パッケージが存在しない場合に自動的にインストールされるようにします。`:config`ブロックで、`load-theme`関数を使用して目的のテーマをロードします。ここでは、`doom-one`テーマが使用されます。
+
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :config
+  (load-theme 'doom-one t))
+#+end_src
+
+* ナビゲーションと補完
+** Ivy
+*** 役割
+`Ivy`は、Emacsのミニバッファ用の柔軟で高速な補完フレームワークです。ファイル、バッファ、コマンドなど、さまざまな項目を効率的に検索および選択するのに役立ちます。
+
+*** 設定方法
+`use-package`を使用して`Ivy`をインストールしてアクティブ化します。`:ensure t`は、パッケージが存在しない場合に自動的にインストールされるようにします。
+
+#+begin_src emacs-lisp
+(use-package ivy
+  :ensure t)
+#+end_src
+
+** Counsel
+*** 役割
+`Counsel`は、`Ivy`フレームワークに基づいた様々なコマンドと機能のインターフェースを提供します。`M-x`（拡張コマンド実行）のようなEmacsのコア機能を`Ivy`の強力な検索およびフィルタリング機能と統合することで、使いやすさを向上させます。
+
+*** 設定方法
+`use-package`を使用して`Counsel`をインストールし、`:config`ブロックで`M-x`キーを`counsel-M-x`にバインドして、Ivyベースのコマンド実行を有効にします。
+
+#+begin_src emacs-lisp
+(use-package counsel
+  :ensure t
+  :config
+  (global-set-key (kbd "M-x") 'counsel-M-x))
+#+end_src
+
+** Projectile
+*** 役割
+`Projectile`は、Emacsにおけるプロジェクト管理のための強力なツールです。プロジェクト内のファイルの検索、バッファの切り替え、コンパイル、テストの実行など、プロジェクト関連のタスクを効率的に実行するのに役立ちます。
+
+*** 設定方法
+`use-package`を使用して`Projectile`をインストールしてアクティブ化します。追加の設定なしでほとんどのプロジェクトでうまく機能します。
+
+#+begin_src emacs-lisp
+(use-package projectile
+  :ensure t)
+#+end_src
+
+** Company
+*** 役割
+`Company`はEmacsのテキスト自動補完フレームワークです。コードを記述する際に、文脈に応じた補完候補を提供し、生産性を向上させます。
+
+*** 設定方法
+`use-package`を使用して`Company`をインストールし、`:init`ブロックで`global-company-mode`をアクティブ化して、すべてのバッファで自動補完を有効にします。
+
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t
+  :init
+  (global-company-mode))
+#+end_src
+
+* Evilモード設定
+** Evil
+*** 役割
+`Evil`は、EmacsでVimのキーバインディングと編集スタイルを使用できるようにする強力なエミュレーションレイヤーです。Vimユーザーが慣れ親しんだVim操作でEmacsの豊富な機能を活用できるようにします。
+
+*** 設定方法
+`use-package`を使用して`Evil`をインストールしてアクティブ化します。
+- `:init`ブロックでは、`evil-want-integration t`は他のEmacsパッケージとの統合を有効にし、`evil-want-keybinding nil`は`Evil`がデフォルトのEmacsキーバインディングを上書きするのを防ぎます。
+- `:config`ブロックでは、`(evil-mode 1)`が`Evil`モードをグローバルにアクティブ化します。
+- `(define-key evil-insert-state-map "jk" 'evil-normal-state)`は、`jk`を押して挿入モードからノーマルモードに切り替えるカスタムキーバインディングです。
+
+#+begin_src emacs-lisp
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map "jk" 'evil-normal-state))
+#+end_src
+
+** Evil Collection
+*** 役割
+`Evil Collection`は、`Evil`モードを様々なEmacsの組み込み機能や人気パッケージと統合し、一貫したVimキーバインディング体験を提供します。例えば、Dired、Magit、Org-modeなどでVimキーバインディングを使用できるようになります。
+
+*** 設定方法
+`use-package`を使用して`Evil Collection`をインストールし、`:after evil`を使用して`Evil`パッケージがロードされた後にアクティブ化します。`:config`ブロックで、`(evil-collection-init)`を呼び出して統合を初期化します。
+
+#+begin_src emacs-lisp
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (evil-collection-init))
+#+end_src
+
+** Evil Surround
+*** 役割
+`Evil Surround`は、Vimの`surround.vim`プラグインに似たパッケージで、括弧、引用符、タグなどを簡単に追加、変更、削除できます。コード編集時に非常に便利です。
+
+*** 設定方法
+`use-package`を使用して`Evil Surround`をインストールし、`:after evil`を使用して`Evil`パッケージがロードされた後にアクティブ化します。`:config`ブロックで、`(global-evil-surround-mode 1)`を呼び出して`Evil Surround`機能をグローバルにアクティブ化します。
+
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+#+end_src
+
+* vterm
+** 役割
+`vterm`は、Emacs内でフル機能のターミナルエミュレータを提供するパッケージです。Emacsを離れることなく、シェルコマンドの実行、コマンドラインツールの使用、ターミナルセッションの管理が可能です。
+
+** 設定方法
+`use-package`を使用して`vterm`をインストールします。`vterm`のインストールを試みる前に、設定はシステムに`cmake`が利用可能かどうかを確認します。macOSで`cmake`が見つからない場合、Homebrewを使用して自動的にインストールされます。変更が有効になり、`vterm`が正しくコンパイルされるためには、インストール後にEmacsを再起動する必要があります。
+
+#+begin_src emacs-lisp
+(when (and (eq system-type 'darwin) (not (executable-find "cmake")))
+  (message "vterm: cmake not found. Attempting to install via Homebrew...")
+  (shell-command "brew install cmake")
+  (message "CMake has been installed. Please restart Emacs to allow vterm to compile."))
+
+(use-package vterm
+  :ensure t
+  :init
+  (setq vterm-always-compile-module t))
+#+end_src
+
+* Git統合
+** transient
+*** 役割
+`transient`は、Magitを含む多くのEmacsパッケージで、一時的なキーマップと引数を使用して複雑でインタラクティブなコマンドを作成するために使用されるライブラリです。多段階操作に一貫したインターフェースを提供します。
+
+*** 設定方法
+Magitなど、`transient`に依存するパッケージの前に`transient`がインストールされ、ロードされていることを確認してください。
+
+#+begin_src emacs-lisp
+(use-package transient
+  :ensure t)
+#+end_src
+
+** Magit
+*** 役割
+`Magit`は、Emacs用の包括的なGitインターフェースです。Emacs内で直接Gitリポジトリと対話するための便利で強力な方法を提供し、ステージングやコミットからブランチングやリベースまで、直感的なEmacsインターフェースを通じてあらゆるGit操作を提供します。
+
+*** 設定方法
+`use-package`を使用して`Magit`をインストールします。`:ensure t`キーワードは、`Magit`がまだ存在しない場合に自動的にインストールされるようにします。`:bind`オプションは、`C-x g`キーバインディングを設定し、ほとんどの`Magit`操作の主要なエントリポイントである`Magit`ステータスバッファを素早く開くことができます。
+
+#+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :after transient
+  :init
+  (require 'transient)
+  :bind ("C-x g" . magit-status))
+#+end_src
+
+* 一般的なキーバインディング
+** which-key
+*** 役割
+`which-key`は、プレフィックスキー（リーダーキー`SPC`など）を押した後に利用可能なキーバインディングをポップアップウィンドウに表示する必須のパッケージです。これにより、キーバインディングの発見と使用がはるかに簡単になります。
+
+*** 設定方法
+`use-package`を使用して`which-key`をインストールしてアクティブ化します。`:config`ブロックで`(which-key-mode)`が呼び出され、グローバルに有効になります。
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode))
+#+end_src
+
+** General
+*** 役割
+`General`は、Emacsでカスタムキーバインディングを設定するために使用される強力なパッケージです。特に「リーダーキー」を使用してVimのようなキーバインディングシステムを構築するために、複雑なキーシーケンスを簡単に定義および管理するのに役立ちます。
+
+*** 設定方法
+`use-package`を使用して`General`をインストールします。
+
+`:config`ブロックで、`general-create-definer`を使用して`leader-def`という新しいキーバインディング定義子を作成します。
+- `:prefix "SPC"`: スペースバーをリーダーキーとして設定します。これは、すべてのカスタムキーバインディングがスペースバーを押した後に開始されることを意味します。
+- `:non-normal-prefix "M-SPC"`: `M-SPC`（Alt + Space）を非ノーマル状態（挿入モードなど）のリーダーキーとして設定します。
+- `:states '(normal insert emacs)`: このキーバインディング定義子を`normal`、`insert`、`emacs`モードで有効にします。
+
+`leader-def`を使用して実際のキーバインディングを定義します。
+- `(leader-def ":" 'counsel-M-x)`: `SPC :`を押すと、`counsel-M-x`（Ivyベースのコマンド実行）が実行されます。
+- `(leader-def "b N" 'switch-to-buffer)`: `SPC b N`を押すと、バッファ切り替えコマンドが実行されます。
+
+`which-key-idle-delay`と`which-key-show-remaining-keys`は、`which-key`パッケージ（`General`と併用されることが多い）の動作を設定します。`which-key`は、リーダーキーを押した後に利用可能な次のキーバインディングのポップアップを表示する便利なパッケージです。
+
+#+begin_src emacs-lisp
+(use-package general
+  :ensure t
+  :config
+  (general-create-definer leader-def
+    :prefix "SPC"
+    :non-normal-prefix "M-SPC"
+    :states '(normal insert emacs))
+
+  (leader-def
+    ":" 'counsel-M-x
+    "b" '(:ignore t :which-key "Buffers")
+    "b N" 'switch-to-buffer
+    "b k" 'kill-buffer
+    "t" '(:ignore t :which-key "Terminal")
+    "t t" 'vterm
+    "f" '(:ignore t :which-key "Files")
+    "f p" '("Find config.org" . (lambda () (interactive) (find-file (expand-file-name "~/dotfiles/config.org"))))))
+(setq which-key-idle-delay 0.5)
+(setq which-key-show-remaining-keys t)
+#+end_src
+
+* カスタム設定
+** 役割
+このセクションには、Emacsの`customize`インターフェースによって生成されたカスタム設定が含まれています。これらの設定は通常、`M-x customize`または関連する関数を使用するとEmacsによって自動的に保存されます。手動でのエラーを避けるため、これらの設定は`customize`インターフェースを通じて管理することをお勧めします。
+
+** 設定方法
+`custom-set-variables`ブロックはカスタム変数値を定義し、`custom-set-faces`はカスタムフェイス（フォントと色）設定を定義します。これらはEmacsによって自動的に生成および管理されます。
+
+#+begin_src emacs-lisp
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they't work right.
+ '(package-selected-packages
+   '(vterm which-key projectile general evil-surround evil-collection doom-themes counsel company cider)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they't work right.
+ )
+#+end_src

@@ -18,6 +18,20 @@ Before using `use-package`, you need to set up Emacs package archives. Here, MEL
 
 (package-initialize)
 
+(defvar my-package-install-retry-count 0)
+(defadvice package-install (around my-package-install-advice activate)
+  "Retry package installation after refreshing contents if it fails."
+  (condition-case err
+      ad-do-it
+    (error
+     (when (and (string-match "Failed to install" (cdr (car err)))
+                (< my-package-install-retry-count 3)) ; Limit retries to prevent infinite loops
+       (setq my-package-install-retry-count (1+ my-package-install-retry-count))
+       (message "Package installation failed. Refreshing package contents and retrying...")
+       (package-refresh-contents)
+       (package-install (car (cdr (car err)))) ; Retry installation with the same package
+       ))))
+
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 (require 'use-package)
@@ -55,6 +69,8 @@ Configures basic Emacs behavior. Primarily includes settings for visual elements
 ;;(global-auto-revert-mode 1)
 ;;(setq auto-save-default t)
 ;;(setq auto-save-interval 300)
+
+(setq scroll-conservatively 100000) ; Prevent cursor from auto-scrolling to center of screen
 #+end_src
 
 * Themes
@@ -194,6 +210,35 @@ Install `vterm` using `use-package`. Before attempting to install `vterm`, the c
   :ensure t
   :init
   (setq vterm-always-compile-module t))
+#+end_src
+
+* Git Integration
+** transient
+*** Role
+`transient` is a library used by many Emacs packages, including Magit, to create complex, interactive commands with temporary keymaps and arguments. It provides a consistent interface for multi-step operations.
+
+*** Configuration Method
+Ensure `transient` is installed and loaded before packages that depend on it, such as Magit.
+
+#+begin_src emacs-lisp
+(use-package transient
+  :ensure t)
+#+end_src
+
+** Magit
+*** Role
+`Magit` is a comprehensive Git interface for Emacs. It provides a convenient and powerful way to interact with Git repositories directly within Emacs, offering a full range of Git operations from staging and committing to branching and rebasing, all through an intuitive Emacs interface.
+
+*** Configuration Method
+Install `Magit` using `use-package`. The `:ensure t` keyword ensures that `Magit` is automatically installed if it's not already present. The `:bind` option sets up a keybinding, `C-x g`, to quickly open the `Magit` status buffer, which is the primary entry point for most `Magit` operations.
+
+#+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :after transient
+  :init
+  (require 'transient)
+  :bind ("C-x g" . magit-status))
 #+end_src
 
 * General Keybindings
