@@ -100,7 +100,9 @@ Emacs がシェルと同じ環境変数、特に `PATH` を共有するように
 
 #+begin_src emacs-lisp
 (use-package ivy
-  :ensure t)
+  :ensure t
+  :config
+  (ivy-mode 1))
 #+end_src
 
 ** Counsel
@@ -209,6 +211,34 @@ Emacs がシェルと同じ環境変数、特に `PATH` を共有するように
   :config
   (require 'smartparens-config)
   (smartparens-global-mode 1))
+#+end_src
+
+* Editing
+** smartparens
+*** 役割
+`smartparens` は、ペア認識編集を支援するパッケージです。括弧、ブラケット、引用符などの閉じペアを自動的に挿入し、それらをインテリジェントに操作するコマンドを提供します。これは、コードや構造化されたテキストを作成するのに非常に役立ちます。
+
+*** 設定方法
+`use-package` を使用して `smartparens` をインストールします。`:config` ブロックで、`(smartparens-global-mode 1)` は機能をグローバルに有効にします。
+
+#+begin_src emacs-lisp
+(use-package smartparens
+  :ensure t
+  :config
+  (require 'smartparens-config)
+  (smartparens-global-mode 1))
+#+end_src
+
+* Orgモード
+** org-indent-mode アクティベーション
+*** 役割
+Orgモードに入ると `org-indent-mode` をアクティブにし、Orgモードの見出しをインデントして階層構造を視覚的に表現します。これにより、ドキュメントの概要をより簡単に読み、理解することができます。
+
+*** 設定方法
+`org-mode-hook` に `org-indent-mode` を追加して、Orgモードのバッファが開かれるたびに自動的に有効になるようにします。
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
 
 * vterm

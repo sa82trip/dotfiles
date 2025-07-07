@@ -99,10 +99,17 @@ Install and load `doom-themes` using `use-package`. `:ensure t` ensures the pack
 Install and activate `Ivy` using `use-package`. `:ensure t` ensures the package is automatically installed if not present.
 
 #+begin_src emacs-lisp
-(use-package ivy
-  :ensure t)
-#+end_src
+  (use-package ivy
+    :ensure t
+    :config
+    (ivy-mode 1))
 
+
+  (use-package ivy-prescient
+    :after counsel
+    :config
+    (ivy-prescient-mode 1))
+#+end_src
 ** Counsel
 *** Role
 `Counsel` provides an interface for various commands and functions based on the `Ivy` framework. It enhances usability by integrating core Emacs functions like `M-x` (execute-extended-command) with `Ivy`'s powerful search and filtering capabilities.
@@ -209,6 +216,18 @@ Install `smartparens` using `use-package`. In the `:config` block, `(smartparens
   :config
   (require 'smartparens-config)
   (smartparens-global-mode 1))
+#+end_src
+
+* Org Mode
+** org-indent-mode Activation
+*** Role
+Activates `org-indent-mode` when entering Org mode, which indents Org mode headings to visually represent their hierarchical structure. This makes it easier to read and understand the document's outline.
+
+*** Configuration Method
+Add `org-indent-mode` to `org-mode-hook` to ensure it is automatically enabled whenever an Org mode buffer is opened.
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'org-indent-mode)
 #+end_src
 
 * vterm
