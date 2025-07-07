@@ -200,18 +200,26 @@ Install `Evil Surround` using `use-package`, and activate it after the `Evil` pa
 `vterm` is a package that provides a fully-featured terminal emulator inside Emacs. It allows you to run shell commands, use command-line tools, and manage terminal sessions without leaving Emacs.
 
 ** Configuration Method
-Install `vterm` using `use-package`. Before attempting to install `vterm`, the configuration checks if `cmake` is available on the system. If `cmake` is not found on macOS, it will be installed automatically using Homebrew. A restart of Emacs is required after the installation for the changes to take effect and for `vterm` to compile correctly.
+Install `vterm` using `use-package`. The configuration checks if `cmake` is available, which is required to compile `vterm`'s dynamic module.
+- On *macOS*, if `cmake` is not found, it will be automatically installed using Homebrew.
+- On *Linux*, if `cmake` is not found, a message will be displayed instructing the user to install it using their package manager (e.g., `sudo apt-get install cmake`).
+A restart of Emacs may be required after `cmake` is installed for `vterm` to compile correctly.
 
 #+begin_src emacs-lisp
-(when (and (eq system-type 'darwin) (not (executable-find "cmake")))
-  (message "vterm: cmake not found. Attempting to install via Homebrew...")
-  (shell-command "brew install cmake")
-  (message "CMake has been installed. Please restart Emacs to allow vterm to compile."))
-
 (use-package vterm
   :ensure t
   :init
-  (setq vterm-always-compile-module t))
+  (setq vterm-always-compile-module t)
+  :config
+  (when (not (executable-find "cmake"))
+    (cond ((eq system-type 'darwin)
+           (message "vterm: cmake not found. Attempting to install via Homebrew...")
+           (shell-command "brew install cmake")
+           (message "CMake has been installed. Please restart Emacs to allow vterm to compile."))
+          ((eq system-type 'gnu/linux)
+           (message "vterm: cmake not found. Please install it via 'sudo apt-get install cmake' and restart Emacs."))
+          (t
+           (message "vterm: cmake not found. Please install it using your system's package manager and restart Emacs.")))))
 #+end_src
 
 * Git Integration
@@ -287,6 +295,7 @@ Define actual keybindings using `leader-def`.
 
   (leader-def
     ":" 'counsel-M-x
+    "<" 'ivy-switch-buffer
     "b" '(:ignore t :which-key "Buffers")
     "b N" 'switch-to-buffer
     "b k" 'kill-buffer
@@ -296,6 +305,23 @@ Define actual keybindings using `leader-def`.
     "f p" '("Find config.org" . (lambda () (interactive) (find-file (expand-file-name "~/dotfiles/config.org"))))))
 (setq which-key-idle-delay 0.5)
 (setq which-key-show-remaining-keys t)
+#+end_src
+
+* Keybindings
+** Role
+This section defines custom keybindings to enhance the editing experience, particularly for Evil mode users. The goal is to remap certain keys to align with Vim-like behavior while preserving access to essential Emacs commands.
+
+** Configuration Method
+The following configurations are applied:
+- `C-u` is remapped to `evil-scroll-up` in Evil's normal and visual states for intuitive scrolling.
+- The original `universal-argument` command is moved to `SPC u` for easy access.
+
+#+begin_src emacs-lisp
+(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+(define-key evil-visual-state-map (kbd "C-u") 'evil-scroll-up)
+
+(leader-def
+  "u" 'universal-argument)
 #+end_src
 
 * Custom Settings
