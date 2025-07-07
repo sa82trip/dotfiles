@@ -36,17 +36,17 @@ vim.g.maplocalleader = ' '
 
 -- 2. 키 바인딩 (예시)
 -- 파일 저장
-vim.keymap.set('n', '<leader>w', ':w<CR>', { desc = '파일 저장' })
+vim.keymap.set('n', '<leader>w', ':w<CR>', { desc = 'Save file' })
 -- Neovim 종료
-vim.keymap.set('n', '<leader>q', ':q<CR>', { desc = 'Neovim 종료' })
+vim.keymap.set('n', '<leader>q', ':q<CR>', { desc = 'Quit Neovim' })
 -- 저장 후 종료
-vim.keymap.set('n', '<leader>wq', ':wq<CR>', { desc = '저장 후 Neovim 종료' })
+vim.keymap.set('n', '<leader>wq', ':wq<CR>', { desc = 'Save and Quit Neovim' })
 -- 상대 줄 번호 토글
-vim.keymap.set('n', '<leader>rn', ':set relativenumber!<CR>', { desc = '상대 줄 번호 토글' })
+vim.keymap.set('n', '<leader>rn', ':set relativenumber!<CR>', { desc = 'Toggle relative number' })
 
 -- 삽입 모드에서 jk 또는 jj로 노멀 모드 전환
-vim.keymap.set('i', 'jk', '<ESC>', { desc = 'jk로 삽입 모드 종료' })
-vim.keymap.set('i', 'jj', '<ESC>', { desc = 'jj로 삽입 모드 종료' })
+vim.keymap.set('i', 'jk', '<ESC>', { desc = 'Exit Insert mode with jk' })
+vim.keymap.set('i', 'jj', '<ESC>', { desc = 'Exit Insert mode with jj' })
 
 -- 3. 플러그인 관리 (lazy.nvim)
 -- lazy.nvim이 없으면 자동으로 설치
