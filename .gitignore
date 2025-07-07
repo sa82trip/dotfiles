@@ -1,6 +1,8 @@
-
 # Gemini session files
 GEMINI.md
 
 # Backup files
 *BK.org
+
+# Emacs tangled config
+config.el
