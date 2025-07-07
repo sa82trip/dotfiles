@@ -1,0 +1,120 @@
+#+TITLE: Dotfiles Repository
+
+This README provides an overview of this dotfiles repository in English, Korean, and Japanese.
+
+* English
+
+**1. Overview**
+This is a personal repository for managing configuration files (dotfiles) for Emacs and Neovim. The configurations are designed to be cross-platform, working on both macOS and Linux, with a focus on a consistent, Vim-like modal editing experience.
+
+**2. Key Features**
+- *Modal Editing*: Provides a Vim-like experience in both Emacs (`evil-mode`) and Neovim.
+- *Cross-Platform Support*: Designed to work seamlessly on both macOS and Linux.
+- *Modern Package Management*: Uses `use-package` for Emacs and `lazy.nvim` for Neovim for efficient and declarative package management.
+- *Multi-language Comments*: Configurations are maintained with comments in English, Korean, and Japanese to make them easier to understand.
+
+**3. Repository Structure**
+- `init.el`: The entry point for the Emacs configuration. It loads the settings tangled from `config.org`.
+- `config.org`: The main Emacs configuration file written in Org mode. All settings are documented and organized here.
+- `config_kr.org`, `config_jp.org`: Language-specific versions of the Emacs configuration with translated comments.
+- `init_kr.lua`, `init_jp.lua`: Language-specific versions of the Neovim configuration with translated comments.
+- `init.lua`: The main configuration file for Neovim.
+
+**4. Installation**
+1. Clone this repository to your local machine (e.g., `~/.dotfiles`).
+   #+begin_src shell
+   git clone https://github.com/<your-username>/dotfiles.git ~/.dotfiles
+   #+end_src
+
+2. Create symbolic links to the configuration files:
+   - **For Emacs:**
+     #+begin_src shell
+     ln -s ~/.dotfiles/init.el ~/.emacs.d/init.el
+     #+end_src
+   - **For Neovim:**
+     #+begin_src shell
+     # Ensure the directory exists
+     mkdir -p ~/.config/nvim
+     # Create the symlink
+     ln -s ~/.dotfiles/init.lua ~/.config/nvim/init.lua
+     #+end_src
+
+3. Launch Emacs or Neovim. The package managers will automatically install the required packages.
+
+* 한국어 (Korean)
+
+**1. 개요**
+이 저장소는 Emacs와 Neovim의 설정 파일(dotfiles)을 관리하기 위한 개인용 공간입니다. 설정은 macOS와 Linux 환경 모두에서 동작하도록 설계되었으며, 일관성 있는 Vim 스타일의 모달 편집 환경에 중점을 둡니다.
+
+**2. 주요 특징**
+- *모달 편집*: Emacs(`evil-mode`)와 Neovim 모두에서 Vim과 유사한 편집 환경을 제공합니다.
+- *크로스플랫폼 지원*: macOS와 Linux 운영체제에서 모두 원활하게 동작하도록 설계되었습니다.
+- *최신 패키지 관리*: Emacs는 `use-package`를, Neovim은 `lazy.nvim`을 사용하여 효율적이고 선언적으로 패키지를 관리합니다.
+- *다국어 주석*: 설정 내용을 쉽게 이해할 수 있도록 모든 설정 파일에 영어, 한국어, 일본어 주석을 함께 관리합니다.
+
+**3. 저장소 구조**
+- `init.el`: Emacs 설정의 진입점 파일입니다. `config.org`에서 추출된(tangled) 설정을 불러옵니다.
+- `config.org`: Org 모드로 작성된 메인 Emacs 설정 파일입니다. 모든 설정이 이곳에 정리되어 있습니다.
+- `config_kr.org`, `config_jp.org`: 한국어와 일본어 주석이 달린 Emacs 설정 파일입니다.
+- `init_kr.lua`, `init_jp.lua`: 한국어와 일본어 주석이 달린 Neovim 설정 파일입니다.
+- `init.lua`: Neovim의 메인 설정 파일입니다.
+
+**4. 설치 방법**
+1. 이 저장소를 로컬 컴퓨터에 복제합니다 (예: `~/.dotfiles`).
+   #+begin_src shell
+   git clone https://github.com/<your-username>/dotfiles.git ~/.dotfiles
+   #+end_src
+
+2. 설정 파일로 심볼릭 링크를 생성합니다.
+   - **Emacs의 경우:**
+     #+begin_src shell
+     ln -s ~/.dotfiles/init.el ~/.emacs.d/init.el
+     #+end_src
+   - **Neovim의 경우:**
+     #+begin_src shell
+     # 디렉터리가 없는 경우 생성
+     mkdir -p ~/.config/nvim
+     # 심볼릭 링크 생성
+     ln -s ~/.dotfiles/init.lua ~/.config/nvim/init.lua
+     #+end_src
+
+3. Emacs 또는 Neovim을 실행하면 패키지 관리자가 필요한 패키지를 자동으로 설치합니다.
+
+* 日本語 (Japanese)
+
+**1. 概要**
+このリポジトリは、EmacsとNeovimの設定ファイル（dotfiles）を管理するための個人的なスペースです。設定はmacOSとLinuxの両環境で動作するように設計されており、一貫したVimライクなモーダル編集体験に重点を置いています。
+
+**2. 主な特徴**
+- *モーダル編集*: Emacs（`evil-mode`）とNeovimの両方でVimのような編集体験を提供します。
+- *クロスプラットフォーム対応*: macOSとLinuxの両方でシームレスに動作するように設計されています。
+- *モダンなパッケージ管理*: Emacsでは`use-package`を、Neovimでは`lazy.nvim`を使用し、効率的かつ宣言的にパッケージを管理します。
+- *多言語コメント*: 設定内容を理解しやすくするため、すべての設定ファイルに英語、韓国語、日本語のコメントを併記して管理します。
+
+**3. リポジトリ構造**
+- `init.el`: Emacs設定のエントリーポイントファイルです。`config.org`から展開（tangled）された設定を読み込みます。
+- `config.org`: Orgモードで記述されたメインのEmacs設定ファイルです。すべての設定がここに整理されています。
+- `config_kr.org`, `config_jp.org`: 韓国語と日本語のコメントが付いたEmacs設定ファイルです。
+- `init_kr.lua`, `init_jp.lua`: 韓国語と日本語のコメントが付いたNeovim設定ファイルです。
+- `init.lua`: Neovimのメイン設定ファイルです。
+
+**4. インストール方法**
+1. このリポジトリをローカルマシンにクローンします（例：`~/.dotfiles`）。
+   #+begin_src shell
+   git clone https://github.com/<your-username>/dotfiles.git ~/.dotfiles
+   #+end_src
+
+2. 設定ファイルへのシンボリックリンクを作成します。
+   - **Emacsの場合:**
+     #+begin_src shell
+     ln -s ~/.dotfiles/init.el ~/.emacs.d/init.el
+     #+end_src
+   - **Neovimの場合:**
+     #+begin_src shell
+     # ディレクトリが存在しない場合は作成
+     mkdir -p ~/.config/nvim
+     # シンボリックリンクを作成
+     ln -s ~/.dotfiles/init.lua ~/.config/nvim/init.lua
+     #+end_src
+
+3. EmacsまたはNeovimを起動すると、パッケージマネージャーが必要なパッケージを自動的にインストールします。
