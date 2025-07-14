@@ -75,6 +75,10 @@ Emacs가 셸과 동일한 환경 변수, 특히 `PATH`를 공유하도록 보장
 (setq scroll-conservatively 100000) ; 커서가 화면 중앙으로 자동 스크롤되는 것을 방지
 #+end_src
 
+
+
+
+
 * 테마
 ** Doom Themes
 *** 역할

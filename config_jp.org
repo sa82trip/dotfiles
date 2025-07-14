@@ -75,6 +75,10 @@ Emacs がシェルと同じ環境変数、特に `PATH` を共有するように
 (setq scroll-conservatively 100000) ; カーソルが画面の中央に自動的にスクロールするのを防ぎます
 #+end_src
 
+
+
+
+
 * テーマ
 ** Doom Themes
 *** 役割
