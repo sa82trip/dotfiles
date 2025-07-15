@@ -136,20 +136,6 @@ Install and activate `Projectile` using `use-package`. It works well in most pro
   :ensure t)
 #+end_src
 
-** Company
-*** Role
-`Company` is Emacs's text auto-completion framework. It provides context-aware completion candidates when writing code, increasing productivity.
-
-*** Configuration Method
-Install `Company` using `use-package`, and in the `:init` block, activate `global-company-mode` to enable auto-completion in all buffers.
-
-#+begin_src emacs-lisp
-(use-package company
-  :ensure t
-  :init
-  (global-company-mode))
-#+end_src
-
 * Evil Mode Configuration
 ** Evil
 *** Role
@@ -216,6 +202,110 @@ Install `smartparens` using `use-package`. In the `:config` block, `(smartparens
   :config
   (require 'smartparens-config)
   (smartparens-global-mode 1))
+#+end_src
+
+* Programming
+** Company
+*** Role
+`Company` is Emacs's text auto-completion framework. It provides context-aware completion candidates when writing code, increasing productivity.
+
+*** Configuration Method
+Install `Company` using `use-package`, and in the `:init` block, activate `global-company-mode` to enable auto-completion in all buffers. The `:config` block sets up the completion UI and explicitly defines the order of completion backends.
+
+#+begin_src emacs-lisp
+(use-package company
+  :ensure t
+  :init
+  (global-company-mode)
+  :config
+  ;; Additional settings for the auto-completion UI (optional)
+  (setq company-idle-delay 0.2)
+  (setq company-minimum-prefix-length 2)
+
+  ;; Set the list of backends directly (this is the key part)
+  (setq company-backends
+        '(;; 1st priority: Snippets (suggested first)
+          company-yasnippet
+
+          ;; 2nd priority: Emacs Lisp symbols (defun, let, etc.)
+          company-elisp
+
+          ;; 3rd priority: Code words from the current buffer
+          company-dabbrev-code
+
+          ;; 4th priority: File paths (e.g., /usr/ when typing "/u")
+          company-files
+          
+          ;; 5th priority: Other keywords
+          company-keywords)))
+#+end_src
+
+** company-quickhelp
+*** Role
+`company-quickhelp` provides a pop-up that displays documentation or the content of a snippet for the selected completion candidate.
+
+*** Configuration
+This setup enables `company-quickhelp-mode` after `company` is loaded, allowing snippet previews in the completion UI.
+
+#+begin_src emacs-lisp
+(use-package company-quickhelp
+  :ensure t
+  :after company
+  :config
+  (setq company-quickhelp-max-lines 20)
+  (company-quickhelp-mode))
+#+end_src
+
+** yasnippet
+*** Role
+`yasnippet` is a template system for Emacs that allows you to type an abbreviation and have it expand into a code snippet. It significantly speeds up coding by reducing boilerplate typing.
+
+*** Configuration
+This setup ensures `yasnippet` is installed and activates `yas-global-mode` to enable snippet expansion globally.
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :init
+  (yas-global-mode 1)
+  :config
+  (yas-reload-all))
+
+(use-package yasnippet-snippets
+  :ensure t)
+#+end_src
+
+** evil-paredit
+*** Role
+`evil-paredit` integrates `paredit` with `evil-mode`, providing keybindings for paredit commands in evil's normal and visual states. This allows for easy manipulation of s-expressions and other paired delimiters.
+
+*** Configuration
+This setup ensures `evil-paredit` is installed and enables `evil-paredit-mode` after `evil` is loaded.
+
+#+begin_src emacs-lisp
+(use-package evil-paredit
+  :ensure t
+  :after evil
+  :config
+  (evil-paredit-mode))
+#+end_src
+
+** Emacs Lisp
+*** Role
+This configuration enhances the Emacs Lisp development experience by adding on-the-fly syntax checking and documentation support.
+- `flycheck`: Provides real-time syntax checking to catch errors as you type.
+- `eldoc`: Displays documentation for the function or variable at point in the echo area.
+- `company`: (Already installed) Works with `eldoc` to provide intelligent code completion.
+
+*** Configuration
+The following setup ensures that `flycheck` is installed and enabled globally. `eldoc-mode` is activated specifically for `emacs-lisp-mode` to provide contextual documentation.
+
+#+begin_src emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+(add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
 #+end_src
 
 * Org Mode
@@ -352,11 +442,28 @@ The following configurations are applied:
 - The original `universal-argument` command is moved to `SPC u` for easy access.
 
 #+begin_src emacs-lisp
-(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-(define-key evil-visual-state-map (kbd "C-u") 'evil-scroll-up)
+      (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+      (define-key evil-visual-state-map (kbd "C-u") 'evil-scroll-up)
 
-(leader-def
-  "u" 'universal-argument)
+      (leader-def
+        "u" 'universal-argument)
+
+
+      ;; Toggle evil-mode with F12
+    (global-set-key (kbd "<f12>") #'evil-mode)
+
+
+    ;; After loading the 'smartparens' package, reassign the keys.
+  (with-eval-after-load 'smartparens
+    ;; Overwrite the desired functions in the smartparens-specific keymap.
+    ;; This prioritizes smartparens' functionality over global keymap settings.
+    (define-key smartparens-mode-map (kbd "C-M-f") #'sp-forward-slurp-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-b") #'sp-backward-barf-sexp)
+  
+    ;; (Optional) smartparens also supports outward Slurp/Barf.
+    ;; If the keys do not overlap, it is convenient to set them together.
+    (define-key smartparens-mode-map (kbd "C-M-u") #'sp-backward-slurp-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-d") #'sp-forward-barf-sexp))
 #+end_src
 
 * Custom Settings

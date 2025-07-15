@@ -75,10 +75,6 @@ Emacs가 셸과 동일한 환경 변수, 특히 `PATH`를 공유하도록 보장
 (setq scroll-conservatively 100000) ; 커서가 화면 중앙으로 자동 스크롤되는 것을 방지
 #+end_src
 
-
-
-
-
 * 테마
 ** Doom Themes
 *** 역할
@@ -103,12 +99,17 @@ Emacs가 셸과 동일한 환경 변수, 특히 `PATH`를 공유하도록 보장
 `use-package`를 사용하여 `Ivy`를 설치하고 활성화합니다. `:ensure t`는 패키지가 없을 경우 자동으로 설치되도록 합니다.
 
 #+begin_src emacs-lisp
-(use-package ivy
-  :ensure t
-  :config
-  (ivy-mode 1))
-#+end_src
+  (use-package ivy
+    :ensure t
+    :config
+    (ivy-mode 1))
 
+
+  (use-package ivy-prescient
+    :after counsel
+    :config
+    (ivy-prescient-mode 1))
+#+end_src
 ** Counsel
 *** 역할
 `Counsel`은 `Ivy` 프레임워크를 기반으로 다양한 명령어와 함수에 대한 인터페이스를 제공합니다. `M-x` (execute-extended-command)와 같은 핵심 Emacs 함수를 `Ivy`의 강력한 검색 및 필터링 기능과 통합하여 사용성을 향상시킵니다.
@@ -133,20 +134,6 @@ Emacs가 셸과 동일한 환경 변수, 특히 `PATH`를 공유하도록 보장
 #+begin_src emacs-lisp
 (use-package projectile
   :ensure t)
-#+end_src
-
-** Company
-*** 역할
-`Company`는 Emacs의 텍스트 자동 완성 프레임워크입니다. 코드 작성 시 문맥에 맞는 자동 완성 후보를 제공하여 생산성을 높입니다.
-
-*** 설정 방법
-`use-package`를 사용하여 `Company`를 설치하고, `:init` 블록에서 `global-company-mode`를 활성화하여 모든 버퍼에서 자동 완성을 활성화합니다.
-
-#+begin_src emacs-lisp
-(use-package company
-  :ensure t
-  :init
-  (global-company-mode))
 #+end_src
 
 * Evil 모드 설정
@@ -217,20 +204,108 @@ Emacs가 셸과 동일한 환경 변수, 특히 `PATH`를 공유하도록 보장
   (smartparens-global-mode 1))
 #+end_src
 
-* Editing
-** smartparens
+* 프로그래밍
+** Company
 *** 역할
-`smartparens`는 쌍 인식을 지원하는 편집 패키지입니다. 괄호, 대괄호, 따옴표 등의 닫는 쌍을 자동으로 삽입하고, 이를 지능적으로 조작하는 명령을 제공합니다. 이는 코드 및 구조화된 텍스트를 작성하는 데 매우 유용합니다.
+`Company`는 Emacs의 텍스트 자동 완성 프레임워크입니다. 코드 작성 시 문맥에 맞는 자동 완성 후보를 제공하여 생산성을 높입니다.
 
 *** 설정 방법
-`use-package`를 사용하여 `smartparens`를 설치합니다. `:config` 블록에서 `(smartparens-global-mode 1)`은 기능을 전역적으로 활성화합니다.
+`use-package`를 사용하여 `Company`를 설치하고, `:init` 블록에서 `global-company-mode`를 활성화하여 모든 버퍼에서 자동 완성을 활성화합니다. `:config` 블록은 자동 완성 UI를 설정하고 백엔드의 순서를 명시적으로 정의합니다.
 
 #+begin_src emacs-lisp
-(use-package smartparens
+(use-package company
   :ensure t
+  :init
+  (global-company-mode)
   :config
-  (require 'smartparens-config)
-  (smartparens-global-mode 1))
+  ;; 자동 완성 UI 관련 추가 설정 (선택 사항)
+  (setq company-idle-delay 0.2)
+  (setq company-minimum-prefix-length 2)
+
+  ;; 백엔드 리스트를 직접 설정합니다. (이 부분이 핵심)
+  (setq company-backends
+        '(;; 1순위: 스니펫 (가장 먼저 제안)
+          company-yasnippet
+
+          ;; 2순위: Emacs Lisp 심볼 (defun, let 등)
+          company-elisp
+
+          ;; 3순위: 현재 버퍼에 있는 코드 단어들 (이것이 원하던 기능!)
+          company-dabbrev-code
+
+          ;; 4순위: 파일 경로 ("/u" 입력 시 /usr/ 등)
+          company-files
+          
+          ;; 5순위: 그 외 키워드
+          company-keywords)))
+#+end_src
+
+** company-quickhelp
+*** 역할
+`company-quickhelp`는 선택된 자동 완성 후보에 대한 문서나 스니펫 내용을 팝업으로 보여주는 기능을 제공합니다.
+
+*** 설정 방법
+이 설정은 `company`가 로드된 후 `company-quickhelp-mode`를 활성화하여 자동 완성 UI에 스니펫 미리보기를 표시합니다.
+
+#+begin_src emacs-lisp
+(use-package company-quickhelp
+  :ensure t
+  :after company
+  :config
+  (setq company-quickhelp-max-lines 20)
+  (company-quickhelp-mode))
+#+end_src
+
+** yasnippet
+*** 역할
+`yasnippet`은 Emacs를 위한 템플릿 시스템으로, 약어를 입력하면 코드 스니펫으로 확장되어 보일러플레이트 코드를 줄여 코딩 속도를 크게 향상시킵니다.
+
+*** 설정 방법
+이 설정은 `yasnippet`을 설치하고 `yas-global-mode`를 활성화하여 전역적으로 스니펫 확장을 활성화합니다.
+
+#+begin_src emacs-lisp
+(use-package yasnippet
+  :ensure t
+  :init
+  (yas-global-mode 1)
+  :config
+  (yas-reload-all))
+
+(use-package yasnippet-snippets
+  :ensure t)
+#+end_src
+
+** evil-paredit
+*** 역할
+`evil-paredit`은 `paredit`을 `evil-mode`와 통합하여, evil의 일반 및 비주얼 상태에서 paredit 명령에 대한 키 바인딩을 제공합니다. 이를 통해 S-표현식 및 기타 쌍으로 된 구분 기호를 쉽게 조작할 수 있습니다.
+
+*** 설정 방법
+이 설정은 `evil`이 로드된 후 `evil-paredit`을 설치하고 `evil-paredit-mode`를 활성화합니다.
+
+#+begin_src emacs-lisp
+(use-package evil-paredit
+  :ensure t
+  :after evil
+  :config
+  (evil-paredit-mode))
+#+end_src
+
+** Emacs Lisp
+*** 역할
+이 설정은 실시간 문법 검사와 문서 지원을 추가하여 Emacs Lisp 개발 환경을 개선합니다.
+- `flycheck`: 코드를 입력하는 동안 실시간으로 문법 오류를 검사합니다.
+- `eldoc`: 현재 커서가 위치한 곳의 함수나 변수에 대한 문서를 미니버퍼에 표시합니다.
+- `company`: (이미 설치됨) `eldoc`과 함께 지능적인 코드 완성을 제공합니다.
+
+*** 설정 방법
+아래 설정은 `flycheck`를 설치하고 전역적으로 활성화합니다. `eldoc-mode`는 `emacs-lisp-mode`에서 활성화되어 문맥에 맞는 문서를 제공합니다.
+
+#+begin_src emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+(add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
 #+end_src
 
 * Org 모드
@@ -367,11 +442,28 @@ Magit과 같이 `transient`에 의존하는 패키지보다 먼저 `transient`�
 - 원래의 `universal-argument` 명령어는 쉽게 접근할 수 있도록 `SPC u`로 이동됩니다.
 
 #+begin_src emacs-lisp
-(define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
-(define-key evil-visual-state-map (kbd "C-u") 'evil-scroll-up)
+      (define-key evil-normal-state-map (kbd "C-u") 'evil-scroll-up)
+      (define-key evil-visual-state-map (kbd "C-u") 'evil-scroll-up)
 
-(leader-def
-  "u" 'universal-argument)
+      (leader-def
+        "u" 'universal-argument)
+
+
+      ;; F12 키를 눌러 evil-mode를 켜고 끕니다.
+    (global-set-key (kbd "<f12>") #'evil-mode)
+
+
+    ;; 'smartparens' 패키지가 로드된 후에 아래 코드를 실행하여 키를 재할당합니다.
+  (with-eval-after-load 'smartparens
+    ;; smartparens 전용 키맵에 원하는 기능으로 덮어씌웁니다.
+    ;; 이렇게 하면 전역 키맵의 설정을 무시하고 smartparens의 기능을 우선시합니다.
+    (define-key smartparens-mode-map (kbd "C-M-f") #'sp-forward-slurp-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-b") #'sp-backward-barf-sexp)
+  
+    ;; (선택) smartparens는 바깥쪽으로 확장하는 Slurp/Barf도 지원합니다.
+    ;; 키가 겹치지 않는다면 함께 설정해두면 편리합니다.
+    (define-key smartparens-mode-map (kbd "C-M-u") #'sp-backward-slurp-sexp)
+    (define-key smartparens-mode-map (kbd "C-M-d") #'sp-forward-barf-sexp))
 #+end_src
 
 * 사용자 지정 설정
