@@ -1,0 +1,11 @@
+# Emacs packages
+elpa/
+
+# Emacs backup and auto-save files
+*~
+.#*
+
+# Project specific files
+bookmarks
+kkcrc
+projectile-bookmarks.eld
