@@ -5,7 +5,9 @@ GEMINI.md
 *BK.org
 
 # Emacs tangled config
-config.el# Emacs packages
+config.el
+
+# Emacs packages
 elpa/
 
 # Emacs backup and auto-save files
@@ -16,4 +18,5 @@ elpa/
 # Project specific files
 bookmarks
 kkcrc
-projectile-bookmarks.eldconfig.el
+projectile-bookmarks.eld
+config.el

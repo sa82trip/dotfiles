@@ -1,0 +1,10 @@
+#+TITLE: {{TITLE}}
+#+DATE: {{DATE}}
+#+DRAFT: TRUE
+#+OPTIONS: toc:nil num:nil
+
+* 서론
+
+* 본문
+
+* 마무리
