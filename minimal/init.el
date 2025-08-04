@@ -1,3 +1,4 @@
+(setq debug-on-error t)
 ;;;; minimal-init.el --- 학습을 위한 최소한의 Emacs 설정 ---
 
 ;; 이 파일은 학습과 쉬운 이해를 위해 설계된 최소한의 Emacs 설정입니다.
@@ -17,22 +18,22 @@
 (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
 
 
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+;; (defvar bootstrap-version)
+;; (let ((bootstrap-file
+;;        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+;;       (bootstrap-version 5))
+;;   (unless (file-exists-p bootstrap-file)
+;;     (with-current-buffer
+;;         (url-retrieve-synchronously
+;;          "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+;;          'silent 'inhibit-cookies)
+;;       (goto-char (point-max))
+;;       (eval-print-last-sexp)))
+;;   (load bootstrap-file nil 'nomessage))
 
-(setq display-time-format "[%Y-%m-%d %H:%M]")
+(setq display-time-format "%Y-%m-%d %a %H:%M")
 (display-time-mode 1)
-    (setq org-src-preserve-indentation t)
+(setq org-src-preserve-indentation t)
 
 (setq system-time-locale "en_US.UTF-8")
 
@@ -80,6 +81,10 @@
 ;; Emacs 종료 시 북마크를 자동으로 저장합니다.
 ;; 이는 저장된 위치가 세션 간에 지속되도록 보장합니다.
 (setq bookmark-save-flag 1)
+
+;; To make ibuffer default
+(defalias 'list-buffers 'ibuffer) ; make ibuffer default
+
 
 ;;;; 2. 패키지 관리 설정
 
@@ -130,16 +135,16 @@
 
 ;; 활성 모드 라인의 높이를 설정합니다.
 ;; 모드 라인은 현재 버퍼에 대한 유용한 정보를 표시합니다.
-(set-face-attribute 'mode-line nil :height 150)
+(set-face-attribute 'mode-line nil :height 200)
 
 ;; 비활성 모드 라인의 높이를 설정합니다.
 ;; 비활성 모드 라인은 현재 선택되지 않은 다른 창에 속합니다.
-(set-face-attribute 'mode-line-inactive nil :height 100)
+(set-face-attribute 'mode-line-inactive nil :height 150)
 
 ;; --- D2Coding 글꼴 설정 ---
 ;; D2Coding을 Emacs의 기본 글꼴로 설정합니다.
 ;; 이 글꼴은 명확한 가독성으로 인해 프로그래밍에 인기가 있습니다.
-(set-face-attribute 'default nil :font "D2Coding" :height 130)
+(set-face-attribute 'default nil :font "D2Coding" :height 230)
 
 ;; 한글(한국어 문자)에 대해 D2Coding을 명시적으로 설정하여 적절한
 ;; 너비를 보장합니다. 이는 한글 문자가 영어 문자의 두 배 너비를 차지하는
@@ -219,7 +224,7 @@
   (setq company-minimum-prefix-length 2)
   ;; Company 백엔드 목록에 `company-yasnippet`을 추가합니다. 이는
   ;; `yasnippet` (또 다른 스니펫)을 스니펫 완성에 통합합니다.
-  (add-to-list 'company-backends 'company-yasnippet 'company-capf))
+  (add-to-list 'company-backends 'company-yasnippet))
 
 
 ;; --- Flycheck: 실시간 구문 및 스타일 검사 ---
@@ -247,7 +252,9 @@
 ;; Emacs Lisp 모드에서 `eldoc-mode`를 활성화합니다. `eldoc-mode`는
 ;; 입력하는 동안 미니버퍼에 함수 시그니처와 문서를 표시하여
 ;; Lisp 개발에 매우 유용합니다.
-(add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
+(use-package eldoc
+  :after emacs-lisp-mode)
+;;(add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
 
 ;; --- Projectile: 프로젝트 관리 ---
 ;; `projectile`은 Emacs용 프로젝트 상호 작용 라이브러리로,
@@ -295,7 +302,11 @@
   ;; `seoul256` 테마의 배경색을 설정합니다.
   (setq seoul256-background 225)
   ;; `seoul256` 테마를 로드합니다. `t` 인수는 메시지를 억제함을 의미합니다.
-  (load-theme 'seoul256 t))
+  (load-theme 'seoul256 t)
+  '(org-block ((t (:background "#545454" :extend t))))
+  '(org-block-begin-line ((t (:background "##545454" :extend t))))
+  '(org-block-end-line ((t (:background "##545454" :extend t))))
+  '(org-code ((t (:background "#545454" :extend t)))))
 
 ;; --- Exec-Path-From-Shell: 셸 환경 통합 ---
 ;; `exec-path-from-shell`은 Emacs의 `exec-path` (Emacs가 실행 파일을 찾는 곳)를
@@ -344,19 +355,6 @@
   ;; `C-h x` (describe-command)는 이제 `helpful-command`를 사용합니다.
   (global-set-key (kbd "C-h x") #'helpful-command))
 
-;; --- Org-Present: Org Mode 프레젠테이션 모드 ---
-;; `org-present`를 사용하면 Org Mode 파일에서 직접 프레젠테이션을
-;; 만들고 전달할 수 있습니다.
-(use-package org-present
-  ;; 이 패키지가 `org` 다음에 로드되도록 합니다.
-  :after org
-  :hook
-  ;; `org-present-mode`가 활성화 및 비활성화될 때의 훅을 정의합니다.
-  ;; 프레젠테이션 모드에 진입할 때 텍스트를 크게 만들고 인라인 이미지를 표시합니다.
-  ((org-present-mode . (lambda () (org-present-big) (org-display-inline-images)))
-   ;; 프레젠테이션 모드를 종료할 때 텍스트 크기를 되돌리고 인라인 이미지를 제거합니다.
-   (org-present-mode-quit . (lambda () (org-present-small) (org-remove-inline-images)))))
-
 ;; Org Mode에서 `visual-line-mode`를 활성화합니다. 이는 긴 줄을
 ;; 실제 줄 바꿈을 삽입하지 않고 시각적으로 줄 바꿈하여 긴 단락의 가독성을 향상시킵니다.
 (add-hook 'org-mode-hook 'visual-line-mode)
@@ -369,6 +367,14 @@
   ;; `dired-mode` (디렉토리 편집기)에서 `org-download` 기능을 활성화합니다.
   ;; 이를 통해 파일 브라우저에서 Org 파일로 이미지를 드래그 앤 드롭할 수 있습니다.
   (add-hook 'dired-mode-hook 'org-download-enable))
+
+
+;; org mode에서 이미지의 크기를 원본으로 설정하지 않기 위함.
+;; t로 설정하면 org mode에서 보여지는 이미지의 크기를 조정할 수 없음.
+(setq  org-image-actual-width nil)
+
+
+
 
 ;; --- Org Mode Babel 설정 ---
 ;; Org Babel은 Org Mode 파일 내에서 코드 블록을 실행할 수 있도록 합니다.
@@ -419,8 +425,6 @@
    (python . t)  ;; Python 실행 활성화
    (gptel . t))) ;; gptel (AI 상호 작용) 실행 활성화
 
-
-
 ;;;; 7. 기타 유틸리티
 
 ;; 이 섹션에는 다양한 기타 유용한 Emacs 유틸리티가 포함되어 있습니다.
@@ -444,46 +448,54 @@
 ;; 방해 없는 글쓰기 환경을 제공합니다.
 (use-package writeroom-mode)
 
-;; org roam PKM
-(use-package org-roam
-  :after org
-  :ensure t
-  :init
-  (setq org-roam-v2-ack t)
-  (org-roam-db-autosync-mode)
-  :custom
-  (org-roam-directory "~/org")
 
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i"    . completion-at-point)))
+(use-package org-roam                                                   
+  :ensure t                                                             
+  :init                                                                 
+  (setq org-roam-v2-ack t) ; v1에서 마이그레이션 경고를 비활성화합니다. 
+  :custom                                                               
+  (org-roam-directory "~/org")                                          
+  (org-roam-completion-everywhere t)                                    
+  :config                                                               
+  (org-roam-db-autosync-mode)                                           
+  :bind (("C-c n l" . org-roam-buffer-toggle)                           
+         ("C-c n f" . org-roam-node-find)                               
+         ("C-c n i" . org-roam-node-insert)))
 
+
+
+;; (선택 사항) 이 새 함수를 원하는 키에 바인딩할 수 있습니다.
+;; 예: C-c C-q 키 바인딩을 오버라이드하거나 다른 키를 사용합니다.
+;; (define-key org-mode-map (kbd "C-c C-q") #'my-set-tags-and-create-id)
+;; 또는 (define-key org-mode-map (kbd "C-c T") #'my-set-tags-and-create-id)
 
 (use-package org-roam-ui
   ;; :straight
   ;;   (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
   :ensure t
   :after org-roam
-;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-;;         a hookable mode anymore, you're advised to pick something yourself
-;;         if you don't care about startup time, use
-;;  :hook (after-init . org-roam-ui-mode)
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
 (setq completion-ignore-case t)
 
+(use-package git-gutter
+  :hook (prog-mode . git-gutter-mode)
+  :config
+  (setq git-gutter:update-interval 0.02))
 
-
-;;; 블로그 설정 로드
-(load-file (expand-file-name "blog-config.el" user-emacs-directory))
-
-
+(use-package git-gutter-fringe
+  :config
+  (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+  (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 
 ;;;; minimal-init.el 끝
 
@@ -497,41 +509,66 @@
 
 
 ;; org mode에서 src code block의 색을 설정하는 부분
-(use-package org
+;; (use-package org
+;;   :config
+;;   (custom-set-faces
+;;    ;; custom-set-faces was added by Custom.
+;;    ;; If you edit it by hand, you could mess it up, so be careful.
+;;    ;; Your init file should contain only one such instance.
+;;    ;; If there is more than one, they won't work right.
+;;    '(org-block ((t (:background "#545454" :extend t))))
+;;    '(org-block-begin-line ((t (:background "##545454" :extend t))))
+;;    '(org-block-end-line ((t (:background "##545454" :extend t))))
+;;    '(org-code ((t (:background "#545454" :extend t)))))
+
+;;   (custom-set-variables
+;;    )
+;;   '(org-agenda-files
+;;     '("~/org/software_developing_with_ai.org" "/Users/js/org/first.org"))
+;;   '(org-image-actual-width '(300))) 
+(setq user-full-name "Vimacs")
+;; custom-set-variables was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init file should contain only one such instance.
+;; If there is more than one, they won't work right.
+;; '(package-selected-packages
+;;   '(yasnippet-snippets writeroom-mode which-key vterm vertico seoul256-theme ripgrep projectile paredit org-static-blog org-roam-ui org-present org-download org-bullets orderless marginalia magit-section htmlize helpful gptel flycheck expand-region exec-path-from-shell emacsql consult-org-roam company))
+;; 보안상 필요한 코드
+(setq safe-local-variable-values
+      '((org-download-link-format . "[[%s]]")
+        (org-download-image-dir . "~/blog/org/static")))
+
+(defun vimacs/init/open-init-file ()
+  "open currnetly being used init file"
+  (interactive)
+  (find-file user-init-file))
+
+(global-set-key (kbd "C-c i") 'vimacs/init/open-init-file)
+
+
+;;; 블로그 설정 로드
+;;(load-file (expand-file-name "blog-config.el" user-emacs-directory))
+;;(add-to-list 'load-path (expand-file-name "." user-emacs-directory))
+(use-package blog-config
+  :ensure nil
+  :load-path ((lambda () 
+                (list  (expand-file-name "modules" user-emacs-directory))))
+
+  ;;:load-path  "{home}/dotfiles/minimal/modules"
+  :commands (vimacs/update-index-with-posts vimacs/new-blog-post) ;; lazyloading - 이 함수들을 불러야 실제로 로딩이 된다.
   :config
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(org-block ((t (:background "#545454" :extend t))))
-   '(org-block-begin-line ((t (:background "##545454" :extend t))))
-   '(org-block-end-line ((t (:background "##545454" :extend t))))
-   '(org-code ((t (:background "#545454" :extend t)))))
-
-  (custom-set-variables
-   )
-  '(org-agenda-files
-    '("~/org/software_developing_with_ai.org" "/Users/js/org/first.org"))
-  '(org-image-actual-width '(300))
-  ) 
-
-
+  (message "blog 모듈이 로드되었습니다."))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- 
- '(org-html-preamble-format
-   '(("en" "<header>\12    <nav style=\"text-align:center; margin-bottom:2em;\">\12      <a href=\"/index.html\">🏠 홈</a> |\12      <a href=\"/about.html\">👤 소개</a> |\12      <a href=\"/posts/\">📚 전체글</a>\12    </nav>\12   </header>")))
- 
- ;; '(package-selected-packages
- ;;   '(ob-gptel gptel gtel yasnippet-snippets which-key vterm vertico seoul256-theme ripgrep projectile paredit org-present org-download org-bullets orderless marginalia helpful flycheck expand-region exec-path-from-shell company))
- '(safe-local-variable-values
-   '((org-download-link-format . "[[%s]]")
-     (org-download-image-dir . "~/blog/org/static"))))
-
-(provide 'init)
-;;;
+ '(package-selected-packages
+   '(git-gutter-fringe git-gutter yasnippet-snippets writeroom-mode which-key vterm vertico seoul256-theme ripgrep projectile paredit org-roam-ui org-download org-bullets orderless marginalia htmlize helpful gptel flycheck expand-region exec-path-from-shell consult company)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
